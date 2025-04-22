@@ -2,33 +2,25 @@
 
 A full-stack expense tracking application built with Laravel and Vue.js.
 
-![Expense Tracker](https://github.com/preksha014/expense-tracker-laravel-vue/raw/main/public/screenshot.png)
-
 ## Features
 
-- **User Authentication:** Register, login, and manage your personal expense data
 - **Dashboard:** Visual representation of your expenses with charts and statistics
 - **Expense Management:** Add, edit, delete, and categorize expenses
-- **Income Tracking:** Record and monitor your income sources
-- **Reports:** Generate detailed reports based on categories, time periods, and more
-- **Budget Planning:** Set budgets and get alerts when nearing limits
 - **Responsive Design:** Works seamlessly on desktop and mobile devices
 
 ## Technology Stack
 
-- **Backend:** Laravel 10
+- **Backend:** Laravel 12
 - **Frontend:** Vue.js 3
 - **Database:** MySQL
-- **Authentication:** Laravel Sanctum
 - **UI Framework:** Tailwind CSS
-- **Charts:** Chart.js
 
 ## Prerequisites
 
 - PHP >= 8.1
 - Composer
 - Node.js >= 16
-- NPM or Yarn
+- NPM
 - MySQL
 
 ## Installation
@@ -61,7 +53,7 @@ A full-stack expense tracking application built with Laravel and Vue.js.
    ```
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
-   DB_PORT=3306
+   DB_PORT=3307
    DB_DATABASE=expense_tracker
    DB_USERNAME=root
    DB_PASSWORD=
