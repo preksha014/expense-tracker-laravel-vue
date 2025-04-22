@@ -1,0 +1,44 @@
+@tailwind utilities;
+
+/* Custom Styles */
+.btn {
+    @apply py-2 px-4 rounded;
+}
+
+.btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+}
+
+.btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600;
+}
+
+.btn-success {
+    @apply bg-green-500 text-white hover:bg-green-600;
+}
+
+.btn-warning {
+    @apply bg-yellow-500 text-white hover:bg-yellow-600;
+}
+
+/* Form Styles */
+.form-input {
+    @apply border p-2 w-full rounded;
+}
+
+.form-label {
+    @apply block mb-1 font-medium;
+}
+
+.form-group {
+    @apply mb-4;
+}
+
+/* Card Styles */
+.card {
+    @apply bg-white shadow rounded p-4;
+}
+
+.card-header {
+    @apply font-bold text-lg mb-4;
+}

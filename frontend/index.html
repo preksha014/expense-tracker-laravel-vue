@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!--  For Vue 3 -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+  <!--  Vuelidate -->
+  <script src="https://cdn.jsdelivr.net/npm/vue-demi"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vuelidate/core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vuelidate/validators"></script>
+  <title>Expense Tracker</title>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
