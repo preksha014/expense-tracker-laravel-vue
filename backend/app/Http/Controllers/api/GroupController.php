@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Http\Controllers\api;
+
+use App\Helpers\ApiResponse;
+use App\Models\Group;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreGroupRequest;
+
+class GroupController extends Controller
+{
+    public function index()
+    {
+        try {
+            $groups = Group::all();
+            return ApiResponse::success($groups);
+        } catch (\Exception $e) {
+            return ApiResponse::error('Something went wrong: ' . $e->getMessage());
+        }
+    }
+
+    public function create()
+    {
+        return view('groups.create');
+    }
+
+    public function store(StoreGroupRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            $group = Group::create($validated);
+
+            return ApiResponse::success($group, 'Group created successfully');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Something went backend wrong: ' . $e->getMessage());
+        }
+    }
+
+    public function edit(Group $group)
+    {
+        return view('groups.edit', compact('group'));
+    }
+
+    public function update(StoreGroupRequest $request, Group $group)
+    {
+        try {
+            $validated = $request->validated();
+
+            $group->update($validated);
+
+            return ApiResponse::success($group, 'Group updated successfully');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Something went wrong: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy(Group $group)
+    {
+        try {
+            $group->delete();
+
+            return ApiResponse::success([], 'Group deleted successfully');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Something went wrong: ' . $e->getMessage());
+        }
+    }
+}
