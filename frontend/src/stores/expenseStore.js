@@ -36,7 +36,7 @@ export const useExpenseStore = defineStore('expense', () => {
     error.value = null
     try {
       const response = await api.get('/expenses')
-      expenses.value = Array.isArray(response.data) ? response.data : []
+      expenses.value = Array.isArray(response.data.data) ? response.data.data : []
       console.log('Fetched expenses:', expenses.value)
       return expenses.value
     } catch (err) {
@@ -54,10 +54,9 @@ export const useExpenseStore = defineStore('expense', () => {
     error.value = null
     try {
       const response = await api.post('/expenses', expense)
-      console.log(response.data)
-      if (response.data) {
-        expenses.value.push(response.data.expense)
-        return response.data.expense
+      if (response.data.data) {
+        expenses.value.push(response.data.data)
+        return response.data.data
       }
     } catch (err) {
       console.error('Failed to add expense:', err)
@@ -70,30 +69,25 @@ export const useExpenseStore = defineStore('expense', () => {
   async function updateExpense(expenseId, updatedData) {
     try {
       const response = await api.put(`/expenses/${expenseId}`, updatedData);
-  
-      console.log('Response:', response);
-  
-      const updatedExpense = response.data.expense;
-  
-      // Update local state
+
+      const updatedExpense = response.data.data;
+
       const index = expenses.value.findIndex(e => e.id === expenseId);
       if (index !== -1) {
         expenses.value[index] = updatedExpense;
       }
-  
       return updatedExpense;
     } catch (error) {
       console.error('Error updating expense:', error);
       throw error;
     }
   }
-  
+
 
   async function deleteExpense(expenseId) {
     try {
-      await api.delete(`/expenses/${expenseId}`); // Make sure this matches your Laravel route
+      await api.delete(`/expenses/${expenseId}`);
 
-      // Remove the item from the local state
       const index = expenses.value.findIndex(exp => exp.id === expenseId)
       if (index !== -1) {
         expenses.value.splice(index, 1)
@@ -104,11 +98,6 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   }
 
-  // function deleteExpense(index) {
-  //   expenses.value.splice(index, 1)
-  //   saveToLocalStorage()
-  // }
-
   function updateExpenseGroup(oldGroupName, newGroupName) {
     expenses.value = expenses.value.map(expense => {
       if (expense.group === oldGroupName) {
@@ -116,16 +105,11 @@ export const useExpenseStore = defineStore('expense', () => {
       }
       return expense
     })
-    saveToLocalStorage()
   }
 
   function searchExpenses(query) {
     if (!query) return expenses.value
     return expenses.value.filter(e => e.name.toLowerCase().includes(query.toLowerCase()))
-  }
-
-  function saveToLocalStorage() {
-    localStorage.setItem('expenses', JSON.stringify(expenses.value))
   }
 
   return {
@@ -134,12 +118,13 @@ export const useExpenseStore = defineStore('expense', () => {
     highestExpense,
     currentMonthExpense,
     recentExpenses,
+    isLoading,
+    error,
     addExpense,
     updateExpense,
     deleteExpense,
     updateExpenseGroup,
     searchExpenses,
-    fetchExpenses,
-    isLoading
+    fetchExpenses
   }
 })

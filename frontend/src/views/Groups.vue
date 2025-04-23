@@ -71,19 +71,11 @@ function closeGroupModal() {
 }
 
 function editGroup(index) {
-  // console.log('Editing group at index:', index)
   console.log('Group data:', groups.value[index])
   editingGroup.value = groups.value[index]
   editingIndex.value = index
   showGroupModal.value = true
 }
-
-// function saveGroup(group) {
-//   if (editingIndex.value >= 0) {
-//     groupStore.updateGroup(editingIndex.value, group.name)
-//   }
-//   closeGroupModal()
-// }
 
 function showDeleteGroupModal(index) {
   deletingIndex.value = index

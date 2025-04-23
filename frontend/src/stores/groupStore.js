@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import moment from 'moment'
-import axios from 'axios'
 import api from '@/services/api'
 import { useExpenseStore } from './expenseStore'
 
@@ -29,7 +27,7 @@ export const useGroupStore = defineStore('group', () => {
     error.value = null
     try {
       const response = await api.get('/groups')
-      groups.value = Array.isArray(response.data) ? response.data : []
+      groups.value = Array.isArray(response.data.data) ? response.data.data : []
       return groups.value
     } catch (err) {
       console.error('Error fetching groups:', err)
@@ -47,11 +45,11 @@ export const useGroupStore = defineStore('group', () => {
     try {
 
       const response = await api.post('/groups', { name })
-      const group = response.data.group
-      
-      if (response.data) {
+      const group = response.data.data
+
+      if (response.data.data) {
         groups.value.push(group)
-        return response.data.group
+        return group
       }
     } catch (err) {
       console.error('Failed to add group:', err)
@@ -60,45 +58,41 @@ export const useGroupStore = defineStore('group', () => {
     }
   }
 
-
   async function updateGroup(groupId, newName) {
     try {
       const response = await api.put(`/groups/${groupId}`, { name: newName })
-      console.log('Response:', response)
 
-      const updatedGroup = response.data.group
-      
-      // Update local state
+      const updatedGroup = response.data.data
+
       const index = groups.value.findIndex(g => g.id === groupId)
       if (index !== -1) {
         groups.value[index] = updatedGroup
       }
-      
+
       return updatedGroup
     } catch (error) {
-      console.error('Error updating group:', error) 
+      console.error('Error updating group:', error)
       throw error
     }
   }
 
-async function deleteGroup(groupId) {
-  try {
-    await api.delete(`/groups/${groupId}`)
+  async function deleteGroup(groupId) {
+    try {
+      await api.delete(`/groups/${groupId}`)
 
-    // Remove group from local state
-    const index = groups.value.findIndex(g => g.id === groupId)
-    if (index !== -1) {
-      groups.value.splice(index, 1)
+      const index = groups.value.findIndex(g => g.id === groupId)
+      if (index !== -1) {
+        groups.value.splice(index, 1)
+      }
+
+      const expenseStore = useExpenseStore()
+      await expenseStore.fetchExpenses()
+
+    } catch (error) {
+      console.error('Failed to delete group:', error)
+      alert('Failed to delete the group.')
     }
-
-    const expenseStore = useExpenseStore()
-    await expenseStore.fetchExpenses()
-
-  } catch (error) {
-    console.error('Failed to delete group:', error)
-    alert('Failed to delete the group.')
   }
-}
 
   function groupExists(name) {
     return groups.value.some(g => g.name.toLowerCase() === name.toLowerCase())
