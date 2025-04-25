@@ -23,16 +23,28 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
   import { useRoute } from 'vue-router'
-  
+  import { useUserStore } from '@/stores/userStore'
+
+  const userStore = useUserStore()
   const route = useRoute()
   
-  const navigationItems = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Expenses', path: '/expenses' },
-    { name: 'Groups', path: '/groups' }
-  ]
+  const navigationItems = computed(() => {
+    if (userStore.isLoggedIn) {
+      return [
+        { name: 'Dashboard', path: '/' },
+        { name: 'Expenses', path: '/expenses' },
+        { name: 'Groups', path: '/groups' },
+        { name: 'Logout', path: '/logout', action: 'logout'}
+      ]
+    } else {
+      return [
+        { name: 'Login', path: '/login' },
+        { name: 'Register', path: '/register' }
+      ]
+    }
+  })
   
   function isActive(path) {
     if (path === '/' && route.path === '/') {
