@@ -1,3 +1,4 @@
+import router from '@/router';
 import axios from 'axios';
 
 const api = axios.create({
@@ -10,7 +11,6 @@ const api = axios.create({
     }
 });
 
-// Add a request interceptor to include the Bearer token
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -20,6 +20,19 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
+        return Promise.reject(error);
+    }
+);
+
+api.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        if (error.response.status === 401) {
+            console.error('Unauthorized access');
+            router.push('/login');
+        }
         return Promise.reject(error);
     }
 );

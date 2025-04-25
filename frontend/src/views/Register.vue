@@ -5,9 +5,9 @@
       <form @submit.prevent="handleRegister" class="space-y-4">
         <InputField id="name" label="Name" type="text" v-model="formData.name" />
         <InputField id="email" label="Email" type="email" v-model="formData.email" />
-        <InputField id="password" label="Password" type="password" v-model="formData.password" />
+        <InputField id="password" label="Password" type="password" v-model="formData.password" show-toggle/>
         <InputField id="password_confirmation" label="Confirm Password" type="password"
-          v-model="formData.passwordConfirmation" />
+          v-model="formData.password_confirmation" show-toggle />
         <button @click.prevent="handleRegister" type="submit"
           class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
           Register

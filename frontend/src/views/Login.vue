@@ -4,7 +4,7 @@
       <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Login</h2>
       <form @submit.prevent="handleLogin" class="space-y-4">
         <InputField id="email" label="Email" type="email" v-model="formData.email" />
-        <InputField id="password" label="Password" type="password" v-model="formData.password" />
+        <InputField id="password" label="Password" type="password" v-model="formData.password" show-toggle/>
         <button type="submit"
           class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
           Login

@@ -46,7 +46,6 @@ export const useUserStore = defineStore('user', () => {
     async function logoutUser() {
         try {
             const response = await api.post('/logout')
-            // console.log(response.data)
             if (response.data.type === 'success') {
                 localStorage.removeItem('token')
                 isLoggedIn.value = false
