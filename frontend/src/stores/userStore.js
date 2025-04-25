@@ -8,7 +8,7 @@ export const useUserStore = defineStore('user', () => {
     const users = ref([])
     const token = localStorage.getItem('token') || null
     const router = useRouter()
-    const isLoggedIn = ref(false)
+    const isLoggedIn = ref(!!token)
 
     // Actions
     async function registerUser(credentials) {

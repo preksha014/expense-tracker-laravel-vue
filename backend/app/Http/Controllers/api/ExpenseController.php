@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Helpers\ApiResponse;
 use App\Http\Requests\StoreExpenseRequest;
+use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
 use App\Models\Group;
 use App\Http\Controllers\Controller;
@@ -14,7 +15,7 @@ class ExpenseController extends Controller
     {
         try {
             $expenses = Expense::with('group')->get();
-            return ApiResponse::success($expenses);
+            return ApiResponse::success(ExpenseResource::collection($expenses));
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
         }
@@ -32,9 +33,9 @@ class ExpenseController extends Controller
             $validated = $request->validated();
 
             $expense = Expense::create($validated);
-            $data = Expense::with('group')->find($expense->id);
+            $expense->load('group');
 
-            return ApiResponse::success($data, 'Expense created successfully');
+            return ApiResponse::success(new ExpenseResource($expense), 'Expense created successfully');
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
         }
@@ -52,9 +53,9 @@ class ExpenseController extends Controller
             $validated = $request->validated();
 
             $expense->update($validated);
-            $expense = Expense::with('group')->find($expense->id);
+            $expense->load('group');
 
-            return ApiResponse::success($expense, 'Expense updated successfully');
+            return ApiResponse::success(new ExpenseResource($expense), 'Expense updated successfully');
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
         }

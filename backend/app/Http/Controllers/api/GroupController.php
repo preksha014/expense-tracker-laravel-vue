@@ -6,6 +6,7 @@ use App\Helpers\ApiResponse;
 use App\Models\Group;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreGroupRequest;
+use App\Http\Resources\GroupResource;
 
 class GroupController extends Controller
 {
@@ -13,7 +14,7 @@ class GroupController extends Controller
     {
         try {
             $groups = Group::all();
-            return ApiResponse::success($groups);
+            return ApiResponse::success(GroupResource::collection($groups));
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
         }
@@ -31,7 +32,7 @@ class GroupController extends Controller
 
             $group = Group::create($validated);
 
-            return ApiResponse::success($group, 'Group created successfully');
+            return ApiResponse::success(new GroupResource($group), 'Group created successfully');
         } catch (\Exception $e) {
             return ApiResponse::error('Something went backend wrong: ' . $e->getMessage());
         }
@@ -49,7 +50,7 @@ class GroupController extends Controller
 
             $group->update($validated);
 
-            return ApiResponse::success($group, 'Group updated successfully');
+            return ApiResponse::success(new GroupResource($group), 'Group updated successfully');
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
         }

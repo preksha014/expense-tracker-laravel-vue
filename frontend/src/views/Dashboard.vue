@@ -47,8 +47,13 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import ExpenseList from '../components/Expenses/ExpenseList.vue'
 
 const expenseStore = useExpenseStore()
+
+onMounted(() => {
+  expenseStore.fetchExpenses()
+})
 </script>
