@@ -12,26 +12,23 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    //
     public function login(LoginRequest $request)
     {
-        try{
+        try {
             $validated = $request->only('email', 'password');
 
-        if (Auth::attempt($validated)) {
-            $user = Auth::user();
-            $token = $user->createToken('main')->plainTextToken;
+            if (Auth::attempt($validated)) {
+                $user = Auth::user();
+                $token = $user->createToken('main')->plainTextToken;
 
-            return ApiResponse::success([
-                'user' => $user,
-                'token' => $token
-            ]);
-        }
-        }catch(\Exception $e){
+                return ApiResponse::success([
+                    'user' => $user,
+                    'token' => $token
+                ]);
+            }
+        } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
         }
-        
-
     }
 
     public function register(RegisterRequest $request)

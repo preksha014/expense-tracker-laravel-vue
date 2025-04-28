@@ -14,7 +14,7 @@ class ExpenseController extends Controller
     public function index()
     {
         try {
-            $expenses = Expense::with('group')->get();
+            $expenses = Expense::where('user_id', auth()->id())->with('group')->get();
             return ApiResponse::success(ExpenseResource::collection($expenses));
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
@@ -23,7 +23,8 @@ class ExpenseController extends Controller
 
     public function create()
     {
-        $groups = Group::all();
+        // $groups=Group::all();
+        $groups = Group::where('user_id', auth()->id())->get();
         return view('expenses.create', compact('groups'));
     }
 
@@ -31,6 +32,9 @@ class ExpenseController extends Controller
     {
         try {
             $validated = $request->validated();
+
+            // Add user_id to the validated data
+            $validated['user_id'] = auth()->id();
 
             $expense = Expense::create($validated);
             $expense->load('group');
@@ -43,13 +47,23 @@ class ExpenseController extends Controller
 
     public function edit(Expense $expense)
     {
-        $groups = Group::all();
+        $groups = Group::where('user_id', auth()->id())->get();
+
+        // Check expense belongs to authenticated user
+        if ($expense->user_id !== auth()->id()) {
+            return ApiResponse::error('Unauthorized access');
+        }
+
         return view('expenses.edit', compact('expense', 'groups'));
     }
 
     public function update(StoreExpenseRequest $request, Expense $expense)
     {
         try {
+            // Check expense belongs to authenticated user
+            if ($expense->user_id !== auth()->id()) {
+                return ApiResponse::error('Unauthorized access');
+            }
             $validated = $request->validated();
 
             $expense->update($validated);
@@ -64,6 +78,10 @@ class ExpenseController extends Controller
     public function destroy(Expense $expense)
     {
         try {
+            // Check expense belongs to authenticated user
+            if ($expense->user_id !== auth()->id()) {
+                return ApiResponse::error('Unauthorized access');
+            }
             $expense->delete();
 
             return ApiResponse::success([], 'Expense deleted successfully');

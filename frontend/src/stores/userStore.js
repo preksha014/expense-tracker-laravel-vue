@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import api from '@/services/api'
 import { useRouter } from 'vue-router'
 
@@ -27,11 +27,11 @@ export const useUserStore = defineStore('user', () => {
             throw error
         }
     }
-    
+
     async function loginUser(credentials) {
         try {
             isLoggedIn.value = true
-            const response = await api.post('/login', {... credentials })
+            const response = await api.post('/login', { ...credentials })
             if (response.data.data.token) {
                 localStorage.setItem('token', response.data.data.token)
                 users.value = response.data.data.user
@@ -57,14 +57,13 @@ export const useUserStore = defineStore('user', () => {
             throw error
         }
     }
-
     return {
         users,
         token,
         isLoggedIn,
         registerUser,
         loginUser,
-        logoutUser
+        logoutUser,
     }
 })
 

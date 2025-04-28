@@ -11,7 +11,8 @@ class Expense extends Model
         'name',
         'amount',
         'date',
-        'group_id'
+        'group_id',
+        'user_id',
     ];
 
     public function group()

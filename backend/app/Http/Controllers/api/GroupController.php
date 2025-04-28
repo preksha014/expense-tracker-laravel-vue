@@ -13,7 +13,7 @@ class GroupController extends Controller
     public function index()
     {
         try {
-            $groups = Group::all();
+            $groups = Group::where('user_id', auth()->id())->get();
             return ApiResponse::success(GroupResource::collection($groups));
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
@@ -30,24 +30,36 @@ class GroupController extends Controller
         try {
             $validated = $request->validated();
 
+            // Add user_id to the validated data
+            $validated['user_id'] = auth()->id();
+
             $group = Group::create($validated);
 
             return ApiResponse::success(new GroupResource($group), 'Group created successfully');
         } catch (\Exception $e) {
-            return ApiResponse::error('Something went backend wrong: ' . $e->getMessage());
+            return ApiResponse::error('Something went wrong: ' . $e->getMessage());
         }
     }
 
     public function edit(Group $group)
     {
+        // Check group belongs to authenticated user
+        if ($group->user_id !== auth()->id()) {
+            return ApiResponse::error('Unauthorized access');
+        }
+
         return view('groups.edit', compact('group'));
     }
 
     public function update(StoreGroupRequest $request, Group $group)
     {
         try {
-            $validated = $request->validated();
+            // Check group belongs to authenticated user
+            if ($group->user_id !== auth()->id()) {
+                return ApiResponse::error('Unauthorized access');
+            }
 
+            $validated = $request->validated();
             $group->update($validated);
 
             return ApiResponse::success(new GroupResource($group), 'Group updated successfully');
@@ -59,6 +71,11 @@ class GroupController extends Controller
     public function destroy(Group $group)
     {
         try {
+            // Check group belongs to authenticated user
+            if ($group->user_id !== auth()->id()) {
+                return ApiResponse::error('Unauthorized access');
+            }
+
             $group->delete();
 
             return ApiResponse::success([], 'Group deleted successfully');
