@@ -63,7 +63,7 @@ const handleRegister = async () => {
 
   try {
     await userStore.registerUser(formData);
-    router.push('/')
+    router.push('/login')
   } catch (error) {
     console.error('Registration failed:', error)
   }
