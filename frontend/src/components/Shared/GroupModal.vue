@@ -19,7 +19,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps, defineEmits, computed } from 'vue'
 import GroupForm from '../Groups/GroupForm.vue'
 

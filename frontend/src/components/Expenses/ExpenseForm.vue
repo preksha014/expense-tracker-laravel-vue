@@ -51,7 +51,7 @@
   </form>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, onMounted } from 'vue'
 import useVuelidate from '@vuelidate/core'
 import { required, decimal, minValue } from '@vuelidate/validators'

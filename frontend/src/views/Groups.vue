@@ -41,7 +41,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useGroupStore } from '../stores/groupStore'
 import { storeToRefs } from 'pinia'

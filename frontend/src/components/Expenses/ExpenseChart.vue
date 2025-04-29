@@ -7,7 +7,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, defineProps } from 'vue'
 import { Chart } from 'chart.js/auto'
 

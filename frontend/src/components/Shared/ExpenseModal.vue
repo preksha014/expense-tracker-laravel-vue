@@ -20,7 +20,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps, defineEmits, computed } from 'vue'
 import ExpenseForm from '../Expenses/ExpenseForm.vue'
 

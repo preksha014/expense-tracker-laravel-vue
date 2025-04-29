@@ -14,7 +14,7 @@
   </ul>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps, defineEmits } from 'vue'
 import ExpenseItem from './ExpenseItem.vue'
 

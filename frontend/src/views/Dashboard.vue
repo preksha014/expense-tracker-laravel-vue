@@ -53,7 +53,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import { useGroupStore } from '../stores/groupStore'
