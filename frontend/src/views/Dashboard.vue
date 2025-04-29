@@ -30,10 +30,11 @@
       </div>
 
       <!-- Charts Section -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <ExpenseChart chart-id="monthlyTrend" title="Monthly Expense Trend" type="line" :data="monthlyTrendData" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" v-if="!loading">
+        <ExpenseChart chart-id="monthlyTrend" title="Monthly Expense Trend" type="line" :data="monthlyTrendData"
+          key="expense-chart" />
         <ExpenseChart chart-id="categoryDistribution" title="Expense by Category" type="doughnut"
-          :data="categoryDistributionData" />
+          :data="categoryDistributionData" key="group-chart" />
       </div>
 
       <!-- Recent Expenses List -->
@@ -56,7 +57,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useExpenseStore } from '../stores/expenseStore'
 import { useGroupStore } from '../stores/groupStore'
 import AuthLayout from '@/layouts/AuthLayout.vue'
@@ -66,6 +67,7 @@ import moment from 'moment'
 
 const expenseStore = useExpenseStore()
 const groupStore = useGroupStore()
+const loading = ref(false);
 
 // Data for monthly trend chart
 const monthlyTrendData = computed(() => {
@@ -114,7 +116,15 @@ const categoryDistributionData = computed(() => {
 })
 
 onMounted(async () => {
-  expenseStore.fetchExpenses(),
+  loading.value = true
+  await Promise.all([
+    expenseStore.fetchExpenses(),
     groupStore.fetchGroups()
+  ]).then(() => {
+    loading.value = false
+  })
+    .catch(() => {
+      loading.value = false
+    })
 })
 </script>
