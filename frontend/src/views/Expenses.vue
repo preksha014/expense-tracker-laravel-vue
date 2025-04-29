@@ -9,16 +9,17 @@
 
     <!-- Export Expenses -->
     <div class="flex gap-3 mb-4 justify-end">
-      <button @click="exportToCSV()"
-        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center">
-        <span class="mr-1">Export to CSV</span>
+      <button @click="exportToCSV()" :disabled="isCSVExporting"
+        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+        <span class="mr-1">{{ isCSVExporting ? 'Exporting...' : 'Export to CSV' }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 10v6m0 0l-3-3m3 3l3-3m-9 0H3.6a1.2 1.2 0 01-1.2-1.2V4.2A1.2 1.2 0 013.6 3h16.8a1.2 1.2 0 011.2 1.2v12.6a1.2 1.2 0 01-1.2 1.2H12" />
         </svg>
       </button>
-      <button @click="exportToPDF()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center">
-        <span class="mr-1">Export to PDF</span>
+      <button @click="exportToPDF()" :disabled="isPDFExporting"
+        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center">
+        <span class="mr-1">{{ isPDFExporting ? 'Exporting...' : 'Export to PDF' }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 10v6m0 0l-3-3m3 3l3-3m2-8H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2z" />
@@ -63,6 +64,17 @@ import ExpenseFilter from '../components/Expenses/ExpenseFilter.vue'
 import ExpenseModal from '../components/Shared/ExpenseModal.vue'
 import DeleteModal from '../components/Shared/DeleteModal.vue'
 import moment from 'moment'
+import { useFileExport } from '@/composables/useFileExport';
+
+const { exportFile, isCSVExporting, isPDFExporting } = useFileExport();
+
+function exportToCSV() {
+  exportFile('/expenses/export-csv', 'csv', 'expenses.csv', isCSVExporting);
+}
+
+function exportToPDF() {
+  exportFile('/expenses/export-pdf', 'pdf', 'expenses.pdf', isPDFExporting);
+}
 
 const expenseStore = useExpenseStore()
 const groupStore = useGroupStore()
@@ -80,7 +92,6 @@ const showDeleteModal = ref(false)
 const editingExpense = ref(null)
 const editingIndex = ref(-1)
 const deletingIndex = ref(-1)
-const { jsPDF } = window.jspdf;
 
 // Computed total amount
 const totalAmount = computed(() =>
@@ -172,132 +183,133 @@ function findExpenseIndex(expense) {
   )
 }
 
-function exportToCSV() {
-  // Map expenses to include group names
-  const exportData = expenseStore.expenses.map(expense => {
-    const group = groupStore.groups.find(g => g.id === expense.group_id);
-    return {
-      name: expense.name,
-      amount: expense.amount,
-      date: expense.date,
-      group: group ? group.name : 'No Group'
-    };
-  });
-  const csv = Papa.unparse(exportData);
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'expenses.csv';
-  link.click();
-}
 
-function exportToPDF() {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.width;
+// function exportToCSV() {
+//   // Map expenses to include group names
+//   const exportData = expenseStore.expenses.map(expense => {
+//     const group = groupStore.groups.find(g => g.id === expense.group_id);
+//     return {
+//       name: expense.name,
+//       amount: expense.amount,
+//       date: expense.date,
+//       group: group ? group.name : 'No Group'
+//     };
+//   });
+//   const csv = Papa.unparse(exportData);
+//   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+//   const link = document.createElement('a');
+//   link.href = URL.createObjectURL(blob);
+//   link.download = 'expenses.csv';
+//   link.click();
+// }
 
-  // Add title
-  doc.setFontSize(20);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Expense Tracker Report', pageWidth / 2, 20, { align: 'center' });
+// function exportToPDF() {
+//   const doc = new jsPDF();
+//   const pageWidth = doc.internal.pageSize.width;
 
-  // Add date
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Generated on: ${moment().format('MMMM D, YYYY')}`, pageWidth / 2, 30, { align: 'center' });
+//   // Add title
+//   doc.setFontSize(20);
+//   doc.setFont('helvetica', 'bold');
+//   doc.text('Expense Tracker Report', pageWidth / 2, 20, { align: 'center' });
 
-  // Table configuration
-  const startY = 40;
-  const margin = 10;
-  const cellPadding = 2;
-  const columns = [
-    { header: 'Date', width: 30 },
-    { header: 'Name', width: 60 },
-    { header: 'Amount', width: 30, align: 'right' },
-    { header: 'Group', width: 50 }
-  ];
+//   // Add date
+//   doc.setFontSize(10);
+//   doc.setFont('helvetica', 'normal');
+//   doc.text(`Generated on: ${moment().format('MMMM D, YYYY')}`, pageWidth / 2, 30, { align: 'center' });
 
-  // Draw table header
-  let currentX = margin;
-  let currentY = startY;
+//   // Table configuration
+//   const startY = 40;
+//   const margin = 10;
+//   const cellPadding = 2;
+//   const columns = [
+//     { header: 'Date', width: 30 },
+//     { header: 'Name', width: 60 },
+//     { header: 'Amount', width: 30, align: 'right' },
+//     { header: 'Group', width: 50 }
+//   ];
 
-  // Header background
-  doc.setFillColor(240, 240, 240);
-  doc.rect(margin, currentY, pageWidth - (margin * 2), 10, 'F');
+//   // Draw table header
+//   let currentX = margin;
+//   let currentY = startY;
 
-  // Header text
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  columns.forEach(col => {
-    doc.text(col.header, currentX + cellPadding, currentY + 7);
-    currentX += col.width;
-  });
+//   // Header background
+//   doc.setFillColor(240, 240, 240);
+//   doc.rect(margin, currentY, pageWidth - (margin * 2), 10, 'F');
 
-  // Table content
-  currentY += 10;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
+//   // Header text
+//   doc.setFont('helvetica', 'bold');
+//   doc.setFontSize(11);
+//   columns.forEach(col => {
+//     doc.text(col.header, currentX + cellPadding, currentY + 7);
+//     currentX += col.width;
+//   });
 
-  let totalAmount = 0;
+//   // Table content
+//   currentY += 10;
+//   doc.setFont('helvetica', 'normal');
+//   doc.setFontSize(10);
 
-  expenseStore.expenses.forEach((expense) => {
-    const group = groupStore.groups.find(g => g.id === expense.group_id);
-    const groupName = group ? group.name : 'No Group';
-    currentX = margin;
+//   let totalAmount = 0;
 
-    // Add new page if needed
-    if (currentY > 270) {
-      doc.addPage();
-      currentY = margin + 10;
+//   expenseStore.expenses.forEach((expense) => {
+//     const group = groupStore.groups.find(g => g.id === expense.group_id);
+//     const groupName = group ? group.name : 'No Group';
+//     currentX = margin;
 
-      // Draw header on new page
-      doc.setFillColor(240, 240, 240);
-      doc.rect(margin, margin, pageWidth - (margin * 2), 10, 'F');
-      doc.setFont('helvetica', 'bold');
-      let headerX = margin;
-      columns.forEach(col => {
-        doc.text(col.header, headerX + cellPadding, margin + 7);
-        headerX += col.width;
-      });
-      doc.setFont('helvetica', 'normal');
-    }
+//     // Add new page if needed
+//     if (currentY > 270) {
+//       doc.addPage();
+//       currentY = margin + 10;
 
-    // Draw row
-    doc.text(moment(expense.date).format('YYYY-MM-DD'), currentX + cellPadding, currentY + 5);
-    currentX += columns[0].width;
+//       // Draw header on new page
+//       doc.setFillColor(240, 240, 240);
+//       doc.rect(margin, margin, pageWidth - (margin * 2), 10, 'F');
+//       doc.setFont('helvetica', 'bold');
+//       let headerX = margin;
+//       columns.forEach(col => {
+//         doc.text(col.header, headerX + cellPadding, margin + 7);
+//         headerX += col.width;
+//       });
+//       doc.setFont('helvetica', 'normal');
+//     }
 
-    doc.text(expense.name, currentX + cellPadding, currentY + 5);
-    currentX += columns[1].width;
+//     // Draw row
+//     doc.text(moment(expense.date).format('YYYY-MM-DD'), currentX + cellPadding, currentY + 5);
+//     currentX += columns[0].width;
 
-    const amount = Number(expense.amount);
-    totalAmount += amount;
-    doc.text(`₹${amount.toFixed(2)}`, currentX + columns[2].width - cellPadding, currentY + 5, { align: 'right' });
-    currentX += columns[2].width;
+//     doc.text(expense.name, currentX + cellPadding, currentY + 5);
+//     currentX += columns[1].width;
 
-    doc.text(groupName, currentX + cellPadding, currentY + 5);
+//     const amount = Number(expense.amount);
+//     totalAmount += amount;
+//     doc.text(`₹${amount.toFixed(2)}`, currentX + columns[2].width - cellPadding, currentY + 5, { align: 'right' });
+//     currentX += columns[2].width;
 
-    // Draw horizontal line
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, currentY, pageWidth - margin, currentY);
+//     doc.text(groupName, currentX + cellPadding, currentY + 5);
 
-    currentY += 8;
-  });
+//     // Draw horizontal line
+//     doc.setDrawColor(200, 200, 200);
+//     doc.line(margin, currentY, pageWidth - margin, currentY);
 
-  // Draw total
-  currentY += 5;
-  doc.setFont('helvetica', 'bold');
-  doc.text('Total:', margin + columns[0].width + columns[1].width, currentY + 5);
-  doc.text(`₹${totalAmount.toFixed(2)}`, margin + columns[0].width + columns[1].width + columns[2].width - cellPadding, currentY + 5, { align: 'right' });
+//     currentY += 8;
+//   });
 
-  // Add footer
-  const pageCount = doc.internal.getNumberOfPages();
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(8);
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
-  }
-  doc.save('expenses.pdf');
-}
+//   // Draw total
+//   currentY += 5;
+//   doc.setFont('helvetica', 'bold');
+//   doc.text('Total:', margin + columns[0].width + columns[1].width, currentY + 5);
+//   doc.text(`₹${totalAmount.toFixed(2)}`, margin + columns[0].width + columns[1].width + columns[2].width - cellPadding, currentY + 5, { align: 'right' });
+
+//   // Add footer
+//   const pageCount = doc.internal.getNumberOfPages();
+//   doc.setFont('helvetica', 'italic');
+//   doc.setFontSize(8);
+//   for (let i = 1; i <= pageCount; i++) {
+//     doc.setPage(i);
+//     doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
+//   }
+//   doc.save('expenses.pdf');
+// }
 
 onMounted(async () => {
   await expenseStore.fetchExpenses();

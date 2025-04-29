@@ -8,6 +8,10 @@ use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
 use App\Models\Group;
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ExpensesExport;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ExpenseController extends Controller
 {
@@ -87,6 +91,57 @@ class ExpenseController extends Controller
             return ApiResponse::success([], 'Expense deleted successfully');
         } catch (\Exception $e) {
             return ApiResponse::error('Something went wrong: ' . $e->getMessage());
+        }
+    }
+    public function exportCSV()
+    {
+        try {
+            // Get the authenticated user's ID
+            $userId = auth()->id();
+
+            // Check if user has expenses
+            $expenseCount = Expense::where('user_id', $userId)->count();
+            if ($expenseCount === 0) {
+                return ApiResponse::error('No expenses found for export');
+            }
+
+            // Generate a filename with timestamp
+            $fileName = 'expenses-' . now()->format('Y-m-d-H-i-s') . '.csv';
+
+            // Return the download response
+            return Excel::download(new ExpensesExport($userId), $fileName);
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('CSV Export failed: ' . $e->getMessage());
+
+            // Return an error message
+            return ApiResponse::error('Failed to export expenses: ' . $e->getMessage());
+        }
+    }
+
+    public function exportPDF()
+    {
+        try {
+            // Get the authenticated user's expenses
+            $expenses = Expense::where('user_id', auth()->id())
+                ->with('group')
+                ->get();
+
+            if ($expenses->isEmpty()) {
+                return ApiResponse::error('No expenses found for export');
+            }
+
+            // Generate PDF
+            $pdf = Pdf::loadView('pdf.expenses', ['expenses' => $expenses]);
+
+            // Generate filename with timestamp
+            $fileName = 'expenses-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+            // Return the PDF for download
+            return $pdf->download($fileName);
+        } catch (\Exception $e) {
+            Log::error('PDF Export failed: ' . $e->getMessage());
+            return ApiResponse::error('Failed to export PDF: ' . $e->getMessage());
         }
     }
 }
