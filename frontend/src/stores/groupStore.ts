@@ -5,20 +5,20 @@ import { useExpenseStore } from './expenseStore'
 
 export const useGroupStore = defineStore('group', () => {
   // State
-  const groups = ref([])
+  const groups = ref<Group[]>([])
   const isLoading = ref(false)
-  const error = ref(null)
+  const error = ref<string | null>(null)
 
   // Getters
   const groupList = computed(() => groups.value)
 
-  const groupExpenses = computed(() => (groupName) => {
+  const groupExpenses = computed(() => (groupName: string): number => {
     const expenseStore = useExpenseStore()
     if (!groupName) return 0
 
     return expenseStore.expenses
-      .filter(e => e.group === groupName)
-      .reduce((sum, e) => sum + e.amount, 0)
+      .filter((e: { group?: string; amount: number }) => e.group !== undefined && e.group === groupName)
+      .reduce((sum: number, e: { amount: number }) => sum + e.amount, 0)
   })
 
   // Actions
@@ -38,49 +38,53 @@ export const useGroupStore = defineStore('group', () => {
     }
   }
 
-  async function addGroup(name) {
-    error.value = null
-    isLoading.value = true
+  interface Group {
+    id: number;
+    name: string;
+  }
+
+  async function addGroup(name: string): Promise<Group | undefined> {
+    error.value = null;
+    isLoading.value = true;
 
     try {
-
-      const response = await api.post('/groups', { name })
-      const group = response.data.data
+      const response = await api.post<{ data: Group }>('/groups', { name });
+      const group = response.data.data;
 
       if (response.data.data) {
-        groups.value.push(group)
-        return group
+        groups.value.push(group);
+        return group;
       }
-    } catch (err) {
-      console.error('Failed to add group:', err)
-      error.value = err.response?.data?.message || 'Failed to add group'
-      throw error.value
+    } catch (err: any) {
+      console.error('Failed to add group:', err);
+      error.value = err.response?.data?.message || 'Failed to add group';
+      throw error.value;
     }
   }
 
-  async function updateGroup(groupId, newName) {
+  async function updateGroup(groupId: number, newName: string): Promise<Group> {
     try {
-      const response = await api.put(`/groups/${groupId}`, { name: newName })
+      const response = await api.put<{ data: Group }>(`/groups/${groupId}`, { name: newName })
 
-      const updatedGroup = response.data.data
+      const updatedGroup: Group = response.data.data
 
-      const index = groups.value.findIndex(g => g.id === groupId)
+      const index = groups.value.findIndex((g: Group) => g.id === groupId)
       if (index !== -1) {
         groups.value[index] = updatedGroup
       }
 
       return updatedGroup
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating group:', error)
       throw error
     }
   }
 
-  async function deleteGroup(groupId) {
+  async function deleteGroup(groupId: number): Promise<void> {
     try {
       await api.delete(`/groups/${groupId}`)
 
-      const index = groups.value.findIndex(g => g.id === groupId)
+      const index = groups.value.findIndex((g: Group) => g.id === groupId)
       if (index !== -1) {
         groups.value.splice(index, 1)
       }
@@ -88,14 +92,14 @@ export const useGroupStore = defineStore('group', () => {
       const expenseStore = useExpenseStore()
       await expenseStore.fetchExpenses()
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete group:', error)
       alert('Failed to delete the group.')
     }
   }
 
-  function groupExists(name) {
-    return groups.value.some(g => g.name.toLowerCase() === name.toLowerCase())
+  function groupExists(name: string): boolean {
+    return groups.value.some((g: Group) => g.name.toLowerCase() === name.toLowerCase())
   }
 
   return {

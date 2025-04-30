@@ -25,18 +25,20 @@
   <script setup lang="ts">
   import { ref, computed } from 'vue'
   import { useRoute } from 'vue-router'
-  import { useUserStore } from '@/stores/userStore'
+  import { useUserStore } from '../stores/userStore'
+  interface NavigationItem {
+    name: string
+    path: string
+    action?: string
+  }
 
-  const userStore = useUserStore()
-  const route = useRoute()
-  
-  const navigationItems = computed(() => {
+  const navigationItems = computed<NavigationItem[]>(() => {
     if (userStore.isLoggedIn) {
       return [
         { name: 'Dashboard', path: '/' },
         { name: 'Expenses', path: '/expenses' },
         { name: 'Groups', path: '/groups' },
-        { name: 'Logout', path: '/logout', action: 'logout'}
+        { name: 'Logout', path: '/logout', action: 'logout' }
       ]
     } else {
       return [
@@ -45,11 +47,14 @@
       ]
     }
   })
-  
-  function isActive(path) {
+
+  function isActive(path: string): boolean {
     if (path === '/' && route.path === '/') {
       return true
     }
     return route.path.startsWith(path) && path !== '/'
   }
+  const userStore = useUserStore()
+  const route = useRoute()
+  
   </script>

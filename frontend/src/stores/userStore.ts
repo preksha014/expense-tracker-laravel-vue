@@ -5,33 +5,67 @@ import { useRouter } from 'vue-router'
 
 export const useUserStore = defineStore('user', () => {
     // State
-    const users = ref([])
+    const users = ref<User | null>(null)
     const token = localStorage.getItem('token') || null
     const router = useRouter()
     const isLoggedIn = ref(!!token)
 
     // Actions
-    async function registerUser(credentials) {
+    interface User {
+        id: number;
+        name: string;
+        email: string;
+    }
+
+    interface RegisterResponse {
+        data: {
+            data: {
+                token: string;
+                user: User;
+            };
+        };
+    }
+
+    interface RegisterCredentials {
+        name: string;
+        email: string;
+        password: string;
+    }
+
+    async function registerUser(credentials: RegisterCredentials): Promise<User | undefined> {
         try {
-            isLoggedIn.value = true
-            const response = await api.post('/register', { ...credentials })
+            isLoggedIn.value = true;
+            const response: RegisterResponse = await api.post('/register', { ...credentials });
             if (response.data.data.token) {
-                console.log(response.data)
-                localStorage.setItem('token', response.data.data.token)
-                users.value = response.data.data.user
-                return response.data.data.user
+                console.log(response.data);
+                localStorage.setItem('token', response.data.data.token);
+                users.value = response.data.data.user;
+                return response.data.data.user;
             }
-        }
-        catch (error) {
-            console.error('Error during registration:', error)
-            throw error
+        } catch (error) {
+            console.error('Error during registration:', error);
+            throw error;
         }
     }
 
-    async function loginUser(credentials) {
+    interface LoginResponse {
+        data: {
+            data: {
+                token: string;
+                user: User;
+            };
+        };
+    }
+
+    interface LoginCredentials {
+        email: string;
+        password: string;
+    }
+
+    async function loginUser(credentials: LoginCredentials): Promise<User | undefined> {
         try {
             isLoggedIn.value = true
-            const response = await api.post('/login', { ...credentials })
+            const response: LoginResponse = await api.post('/login', { ...credentials })
             if (response.data.data.token) {
                 localStorage.setItem('token', response.data.data.token)
                 users.value = response.data.data.user

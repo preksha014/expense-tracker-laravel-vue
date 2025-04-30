@@ -80,7 +80,6 @@ const showDeleteModal = ref(false)
 const editingExpense = ref(null)
 const editingIndex = ref(-1)
 const deletingIndex = ref(-1)
-const { jsPDF } = window.jspdf;
 
 // Computed total amount
 const totalAmount = computed(() =>

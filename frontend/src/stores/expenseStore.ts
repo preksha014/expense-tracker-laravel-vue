@@ -4,25 +4,25 @@ import moment from 'moment'
 import api from '@/services/api'
 
 export const useExpenseStore = defineStore('expense', () => {
-  const expenses = ref([])
+  const expenses = ref<Expense[]>([])
   const isLoading = ref(false)
-  const error = ref(null)
+  const error = ref<string | null>(null)
 
   const totalExpense = computed(() => {
-    return expenses.value.reduce((sum, e) => sum + parseFloat(e.amount), 0)
+    return expenses.value.reduce((sum, e) => sum + parseFloat(e.amount.toString()), 0)
   })
 
   const highestExpense = computed(() => {
     if (!expenses.value.length) return { name: 'None', amount: 0 }
     return expenses.value.reduce((max, e) =>
-      parseFloat(e.amount) > parseFloat(max.amount) ? e : max, expenses.value[0])
+      parseFloat(e.amount.toString()) > parseFloat(max.amount.toString()) ? e : max, expenses.value[0])
   })
 
   const currentMonthExpense = computed(() => {
     const currentMonth = moment().format("YYYY-MM")
     return expenses.value
       .filter(expense => moment(expense.date).format("YYYY-MM") === currentMonth)
-      .reduce((total, expense) => total + parseFloat(expense.amount), 0)
+      .reduce((total, expense) => total + parseFloat(expense.amount.toString()), 0)
   })
 
   const recentExpenses = computed(() => {
@@ -48,29 +48,46 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   }
 
-  async function addExpense(expense) {
-    expense.amount = parseFloat(expense.amount)
-    isLoading.value = true
-    error.value = null
+  interface Expense {
+    id?: number;
+    name: string;
+    amount: number;
+    date: string;
+    group?: string;
+    [key: string]: any;
+  }
+
+  async function addExpense(expense: Expense): Promise<Expense | undefined> {
+    expense.amount = parseFloat(expense.amount.toString());
+    isLoading.value = true;
+    error.value = null;
     try {
-      const response = await api.post('/expenses', expense)
+      const response = await api.post<{ data: Expense }>('/expenses', expense);
       if (response.data.data) {
-        expenses.value.push(response.data.data)
-        return response.data.data
+        expenses.value.push(response.data.data);
+        return response.data.data;
       }
     } catch (err) {
-      console.error('Failed to add expense:', err)
-      error.value = 'Failed to add expense'
+      console.error('Failed to add expense:', err);
+      error.value = 'Failed to add expense';
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
   }
 
-  async function updateExpense(expenseId, updatedData) {
-    try {
-      const response = await api.put(`/expenses/${expenseId}`, updatedData);
+  interface UpdatedExpenseData {
+    name?: string;
+    amount?: number;
+    date?: string;
+    group?: string;
+    [key: string]: any;
+  }
 
-      const updatedExpense = response.data.data;
+  async function updateExpense(expenseId: number, updatedData: UpdatedExpenseData): Promise<Expense | undefined> {
+    try {
+      const response = await api.put<{ data: Expense }>(`/expenses/${expenseId}`, updatedData);
+
+      const updatedExpense: Expense = response.data.data;
 
       const index = expenses.value.findIndex(e => e.id === expenseId);
       if (index !== -1) {
@@ -84,13 +101,13 @@ export const useExpenseStore = defineStore('expense', () => {
   }
 
 
-  async function deleteExpense(expenseId) {
+  async function deleteExpense(expenseId: number): Promise<void> {
     try {
       await api.delete(`/expenses/${expenseId}`);
 
-      const index = expenses.value.findIndex(exp => exp.id === expenseId)
+      const index = expenses.value.findIndex((exp: { id?: number }) => exp.id === expenseId);
       if (index !== -1) {
-        expenses.value.splice(index, 1)
+        expenses.value.splice(index, 1);
       }
     } catch (error) {
       console.error('Failed to delete expense:', error);
@@ -98,8 +115,8 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   }
 
-  function updateExpenseGroup(oldGroupName, newGroupName) {
-    expenses.value = expenses.value.map(expense => {
+  function updateExpenseGroup(oldGroupName: string, newGroupName: string): void {
+    expenses.value = expenses.value.map((expense: Expense) => {
       if (expense.group === oldGroupName) {
         return { ...expense, group: newGroupName }
       }
@@ -107,9 +124,9 @@ export const useExpenseStore = defineStore('expense', () => {
     })
   }
 
-  function searchExpenses(query) {
+  function searchExpenses(query: string): Expense[] {
     if (!query) return expenses.value
-    return expenses.value.filter(e => e.name.toLowerCase().includes(query.toLowerCase()))
+    return expenses.value.filter((e: Expense) => e.name.toLowerCase().includes(query.toLowerCase()))
   }
 
   return {

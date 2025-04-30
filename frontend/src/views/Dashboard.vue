@@ -91,7 +91,7 @@ const monthlyTrendData = computed(() => {
 
 // Data for category distribution chart
 const categoryDistributionData = computed(() => {
-  const groupTotals = {}
+  const groupTotals: Record<string, number> = {}
   expenseStore.expenses.forEach(expense => {
     const group = groupStore.groups.find(g => g.id === expense.group_id)
     const groupName = group ? group.name : 'Uncategorized'
