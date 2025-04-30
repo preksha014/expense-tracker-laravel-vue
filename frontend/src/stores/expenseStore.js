@@ -98,15 +98,6 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   }
 
-  function updateExpenseGroup(oldGroupName, newGroupName) {
-    expenses.value = expenses.value.map(expense => {
-      if (expense.group === oldGroupName) {
-        return { ...expense, group: newGroupName }
-      }
-      return expense
-    })
-  }
-
   function searchExpenses(query) {
     if (!query) return expenses.value
     return expenses.value.filter(e => e.name.toLowerCase().includes(query.toLowerCase()))
@@ -123,7 +114,6 @@ export const useExpenseStore = defineStore('expense', () => {
     addExpense,
     updateExpense,
     deleteExpense,
-    updateExpenseGroup,
     searchExpenses,
     fetchExpenses
   }

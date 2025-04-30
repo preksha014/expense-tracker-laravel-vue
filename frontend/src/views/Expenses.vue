@@ -85,7 +85,7 @@ const groupStore = useGroupStore()
 // Group all filters in a reactive object
 const filters = reactive({
   searchQuery: '',
-  groupFilter: '',
+  groupFilter: 0,
   monthFilter: ''
 })
 
@@ -112,7 +112,7 @@ function applyFilters() {
     const matchesSearch = !filters.searchQuery ||
       expense.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
 
-    const matchesGroup = !filters.groupFilter || expense.group === filters.groupFilter
+    const matchesGroup = !filters.groupFilter || expense.group_id === filters.groupFilter;
 
     const matchesMonth = !filters.monthFilter ||
       moment(expense.date).format('YYYY-MM') === filters.monthFilter
@@ -185,134 +185,6 @@ function findExpenseIndex(expense) {
     e.group === expense.group
   )
 }
-
-
-// function exportToCSV() {
-//   // Map expenses to include group names
-//   const exportData = expenseStore.expenses.map(expense => {
-//     const group = groupStore.groups.find(g => g.id === expense.group_id);
-//     return {
-//       name: expense.name,
-//       amount: expense.amount,
-//       date: expense.date,
-//       group: group ? group.name : 'No Group'
-//     };
-//   });
-//   const csv = Papa.unparse(exportData);
-//   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-//   const link = document.createElement('a');
-//   link.href = URL.createObjectURL(blob);
-//   link.download = 'expenses.csv';
-//   link.click();
-// }
-
-// function exportToPDF() {
-//   const doc = new jsPDF();
-//   const pageWidth = doc.internal.pageSize.width;
-
-//   // Add title
-//   doc.setFontSize(20);
-//   doc.setFont('helvetica', 'bold');
-//   doc.text('Expense Tracker Report', pageWidth / 2, 20, { align: 'center' });
-
-//   // Add date
-//   doc.setFontSize(10);
-//   doc.setFont('helvetica', 'normal');
-//   doc.text(`Generated on: ${moment().format('MMMM D, YYYY')}`, pageWidth / 2, 30, { align: 'center' });
-
-//   // Table configuration
-//   const startY = 40;
-//   const margin = 10;
-//   const cellPadding = 2;
-//   const columns = [
-//     { header: 'Date', width: 30 },
-//     { header: 'Name', width: 60 },
-//     { header: 'Amount', width: 30, align: 'right' },
-//     { header: 'Group', width: 50 }
-//   ];
-
-//   // Draw table header
-//   let currentX = margin;
-//   let currentY = startY;
-
-//   // Header background
-//   doc.setFillColor(240, 240, 240);
-//   doc.rect(margin, currentY, pageWidth - (margin * 2), 10, 'F');
-
-//   // Header text
-//   doc.setFont('helvetica', 'bold');
-//   doc.setFontSize(11);
-//   columns.forEach(col => {
-//     doc.text(col.header, currentX + cellPadding, currentY + 7);
-//     currentX += col.width;
-//   });
-
-//   // Table content
-//   currentY += 10;
-//   doc.setFont('helvetica', 'normal');
-//   doc.setFontSize(10);
-
-//   let totalAmount = 0;
-
-//   expenseStore.expenses.forEach((expense) => {
-//     const group = groupStore.groups.find(g => g.id === expense.group_id);
-//     const groupName = group ? group.name : 'No Group';
-//     currentX = margin;
-
-//     // Add new page if needed
-//     if (currentY > 270) {
-//       doc.addPage();
-//       currentY = margin + 10;
-
-//       // Draw header on new page
-//       doc.setFillColor(240, 240, 240);
-//       doc.rect(margin, margin, pageWidth - (margin * 2), 10, 'F');
-//       doc.setFont('helvetica', 'bold');
-//       let headerX = margin;
-//       columns.forEach(col => {
-//         doc.text(col.header, headerX + cellPadding, margin + 7);
-//         headerX += col.width;
-//       });
-//       doc.setFont('helvetica', 'normal');
-//     }
-
-//     // Draw row
-//     doc.text(moment(expense.date).format('YYYY-MM-DD'), currentX + cellPadding, currentY + 5);
-//     currentX += columns[0].width;
-
-//     doc.text(expense.name, currentX + cellPadding, currentY + 5);
-//     currentX += columns[1].width;
-
-//     const amount = Number(expense.amount);
-//     totalAmount += amount;
-//     doc.text(`₹${amount.toFixed(2)}`, currentX + columns[2].width - cellPadding, currentY + 5, { align: 'right' });
-//     currentX += columns[2].width;
-
-//     doc.text(groupName, currentX + cellPadding, currentY + 5);
-
-//     // Draw horizontal line
-//     doc.setDrawColor(200, 200, 200);
-//     doc.line(margin, currentY, pageWidth - margin, currentY);
-
-//     currentY += 8;
-//   });
-
-//   // Draw total
-//   currentY += 5;
-//   doc.setFont('helvetica', 'bold');
-//   doc.text('Total:', margin + columns[0].width + columns[1].width, currentY + 5);
-//   doc.text(`₹${totalAmount.toFixed(2)}`, margin + columns[0].width + columns[1].width + columns[2].width - cellPadding, currentY + 5, { align: 'right' });
-
-//   // Add footer
-//   const pageCount = doc.internal.getNumberOfPages();
-//   doc.setFont('helvetica', 'italic');
-//   doc.setFontSize(8);
-//   for (let i = 1; i <= pageCount; i++) {
-//     doc.setPage(i);
-//     doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
-//   }
-//   doc.save('expenses.pdf');
-// }
 
 onMounted(async () => {
   await expenseStore.fetchExpenses();
