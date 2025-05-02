@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
+import ChatbotPage from '@/views/ChatbotPage.vue';
 const routes = [
   {
     path: '/',
@@ -39,7 +39,15 @@ const routes = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import("@/views/NotFound.vue")
-  }
+  },
+  {
+    path: '/chatbot',
+    name: 'chatbot',
+    component: ChatbotPage,
+    meta: {
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = createRouter({

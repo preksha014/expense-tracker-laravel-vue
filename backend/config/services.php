@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'github' => [
+        'token' => env('GITHUB_TOKEN'),
+        'api_url' => env('GITHUB_API_URL', 'https://models.github.ai/inference'),
+        'ai_endpoint' => env('GITHUB_AI_ENDPOINT', ''),
+        'model_name' => env('GITHUB_MODEL_NAME', 'openai/gpt-4o'),
+    ],
 ];
