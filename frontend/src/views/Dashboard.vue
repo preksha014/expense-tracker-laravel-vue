@@ -116,7 +116,7 @@ const categoryDistributionData = computed(() => {
 })
 
 onMounted(async () => {
-  loading.value = true
+  loading.value = true  
   await Promise.all([
     expenseStore.fetchExpenses(),
     groupStore.fetchGroups()

@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\GroupController;
 use App\Http\Controllers\api\ExpenseController;
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\ChatbotController;
 
 Route::get('/', function () {
     return response()->json([
@@ -18,5 +19,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/expenses/export-csv', [ExpenseController::class, 'exportCSV']);
     Route::get('/expenses/export-pdf', [ExpenseController::class, 'exportPDF']);
     Route::apiResource('expenses', ExpenseController::class);
+    Route::post('/chat', [ChatbotController::class, 'chat']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
